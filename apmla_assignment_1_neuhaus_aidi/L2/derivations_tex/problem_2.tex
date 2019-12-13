@@ -1,0 +1,7 @@
+Compute the closed-form expression for the E-step, i.e., 
+\[Q(\bold{\Theta}, \bold{\Theta}^{\text{old}})\]
+
+Hint: 
+\begin{align*}
+    Q(\bold{\Theta}, \bold{\Theta}^{\text{old}}) = \sum_{n=1}^N \sum_{k=1}^K p(z_n = k \mid \bold{x_n},\bold{\Theta}^{\text{old}}) \operatorname{log}p(\bold{x_n}, z_n = k \mid \bold{\Theta}) \approx \log p(\{\bold{x}_n\}_{n=1}^N \mid \bold{\Theta})
+\end{align*}

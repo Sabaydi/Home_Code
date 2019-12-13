@@ -1,0 +1,155 @@
+\input{settings} % add packages, settings, and declarations in settings.tex
+
+\begin{document}
+
+\lhead{Yannic Neuhaus, Sabri Aidi} 
+\rhead{Advanced Probabilistic Machine Learning \\ WS19/20 \\ Tutorial 2} 
+\cfoot{\thepage\ of \pageref{LastPage}}
+
+ \begin{enumerate}
+   \item \input{problem_1}
+   
+   %%% Solution 1 %%%
+    \begin{align*}
+        &\log p(\{\xn, z_n\}_{n=1}^N \mid \Th) \\
+        & \\
+        &= \log \prod_{i=1}^N p(\xn, z_n \mid \Th) \\
+        & \\
+        &= \sumN \log \left( \prod_{k=1}^K p(\xn, z_n=k \mid \Th)^{[z_n=k]}\right) \\
+        & \\
+        &= \sumN \log \left( \prod_{k=1}^K \left[p(\xn \mid \thbk) p(z_n=k \mid \Th)\right]^{[z_n=k]}\right) \qquad \text{, }p(z_n=k \mid \Th) = \pi_k\\
+        & \\
+        &= \sumN \sumK \log \left( \left[ \pi_k p(\xn \mid \thbk) \right]^{[z_n = k]} \right) \qquad\text{, }p(\xn \mid \thbk) = \prod_{j=1}^{W_n} \operatorname{Cat}(x_{nj} \mid \thbk)\\\
+        & \\
+        &= \sumN \sumK [z_n = k] \log\left( \pi_k \prod_{j=1}^{W_n} \operatorname{Cat}(x_{nj} \mid \thbk)\right) \\
+        & \\
+        &= \sumN \sumK [z_n = k] \left( \log \pi_k + \log \left[\prod_{j=1}^{W_n} \prod_{m=1}^{\vert I \vert} \theta_{km}^{[x_{nj} = m]}\right]\right) \\
+        & \\
+        &= \sumN \sumK [z_n = k] \left( \log \pi_k + \sum_{j=1}^{W_n} \sum_{m=1}^{\vert I\vert}[x_{nj} = m] \log \theta_{km}\right) \\
+        & \\
+        &= \sumN \left( \log \pi_{z_n} + \sum_{j=1}^{W_n} \sum_{m=1}^{\vert I\vert}[x_{nj} = m] \log \theta_{z_n m}\right) \\
+        & \\
+        &= \sumN \left( \log \pi_{z_n} + \sum_{j=1}^{W_n} \log \theta_{z_n x_{nj}}\right)
+    \end{align*}
+    %%%%%%%%%%%%%%%%%%
+   \newpage
+   \item \input{problem_2}
+   
+   %%% Solution 2 %%%
+   
+   \begin{align*}
+    p(z_n = k \mid \xn, \Thold) &= \frac{p(\xn \mid z_n = k, \Thold)}{p(\xn \mid \Thold)}\\
+    & \\
+    &= \frac{\pi_k p(\xn \mid \thbk^{\text{old}})}{\sum_{l=1}^K \pi_l p(\xn \mid \thb_l^{\text{old}})}\\
+    & \\
+    &= \frac{\pi_k^{\text{old}} \prod_{i=1}^{W_n} \operatorname{Cat}(x_{ni} \mid \thbk^{\text{old}})}{\sum_{l=1}^K \pi_l^{\text{old}} \prod_{j=1}^{W_n} \operatorname{Cat}(x_{nj} \mid \thb_{l}^{\text{old}})}\\
+    & \\
+    &= \frac{\pi_k^{\text{old}} \prod_{i=1}^{W_n} \prod_{m=1}^{\vert I \vert} \theta_{km}^{\text{old} [x_{ni} = m]}}{\sum_{l=1}^K \pi_l^{\text{old}} \prod_{j=1}^{W_n} \prod_{m'=1}^{\vert I \vert} \theta_{lm'}^{\text{old} [x_{nj} = m']}}\\
+    & \\
+    &= \frac{\pi_k^{\text{old}} \prod_{i=1}^{W_n} \theta_{k x_{ni}}^{\text{old}}}{\sum_{l=1}^K \pi_l^{\text{old}} \prod_{j=1}^{W_n} \theta_{l x_{nj}}^{\text{old}}} \\
+    & \\
+    & \\
+    \log p(\xn, z_n = k \mid  \Th) &= \log\left[\pi_k p(\xn \mid \thbk)\right]\\
+    & \\
+    &= \log \pi_k + \log p(\xn \mid \thbk) \\
+    & \\
+    &= \log \pi_k + \sum_{j=1}^{W_n} \log \theta_{k x_{nj}}
+    & \\
+    & \\
+    \Rightarrow Q(\Th, \Thold) &= \sumN \sumK p(z_n = k \mid \xn, \Thold) \log p(\xn, z_n=k\mid \Th) \\
+    & \\
+    &= \sumN \sumK \frac{\pi_k^{\text{old}} \prod_{i=1}^{W_n} \theta_{k x_{ni}}^{\text{old}}}{\sum_{l=1}^K \pi_l^{\text{old}} \prod_{j=1}^{W_n} \theta_{l x_{nj}}^{\text{old}}} \left( \log \pi_k + \sum_{j=1}^{W_n} \log \theta_{k x_{nj}} \right)
+   \end{align*}
+   
+   %%%%%%%%%%%%%%%%%%
+   
+   \item \input{problem_3}
+   
+   %%% Solution 3 %%%
+   
+   %% pi_ml %%
+   \subsection*{$\underline{\pi_k^{ML}:}$}
+   \underline{\textbf{Lagrangian and derivative:}}
+   \begin{align*}
+      Q_\pi(\Th, \Thold) &:= Q(\Th, \Thold) + \lambda \left(\sum_{k=1}^K \pi_k - 1\right) \\
+      & \\
+      & \\
+      \frac{\partial Q(\Th, \Thold)}{\partial \pi_k} &= \sumN \frac{\partial}{\partial \pi_k}\sum_{l=1}^K\left(p(z_n = l \mid \xn, \Thold) \log\pi_l \right) \\
+      & \\
+      &= \sumN \frac{\partial}{\partial \pi_k}\left(p(z_n = k \mid \xn, \Thold) \log\pi_k \right) \\
+      & \\
+      &= \sumN p(z_n = k \mid \xn, \Thold) \frac{\partial}{\partial \pi_k} \log\pi_k
+      & \\
+      &= \sumN p(z_n = k \mid \xn, \Thold) \frac{1}{\pi_k}\\
+      & \\
+      &= \frac{N_k}{\pi_k} \qquad \text{, where } N_k = \sumN p(z_n = k \mid \xn,\Thold)\\ 
+      & \\
+      & \\
+      \Rightarrow \frac{\partial Q_\pi(\Th, \Thold)}{\partial \pi_k} &= \frac{N_k}{\pi_k} + \lambda \\
+   \end{align*}
+   
+   \underline{\textbf{Critical points:}}
+   \[\frac{\partial Q_\pi(\Th, \Thold)}{\partial \pi_k} = \frac{N_k}{\pi_k} + \lambda \overset{!}{=} 0\]
+   \begin{align*}
+       \Rightarrow \frac{N_k}{\pi_k} +  \lambda &= 0 \quad \Rightarrow \quad N_k + \lambda \pi_k = 0 \quad \Rightarrow \quad \lambda \pi_k = -N_k \quad \Rightarrow \quad \lambda \sumK \pi_k = - \sumK N_k \\
+      \Rightarrow \lambda &= -N \quad \text{, since } \sumK \pi_k = 1 \text{ and }\sumK N_k = \sumK \sumN p(z_n = k \mid \xn, \Thold) = \sumN 1 = N
+   \end{align*}
+   
+   
+   \begin{align*}
+     \frac{N_k}{\pi_k} - N = 0 \quad  &\Rightarrow \quad \frac{N_k}{\pi_k} = N \quad \Rightarrow \quad \pi_k N = N_k \quad \Rightarrow \quad \pi_k = \frac{N_k}{N}   
+   \end{align*}
+   
+   
+   \[\Rightarrow \pi_k^{ML} = \frac{N_k}{N}\]
+   
+   %% theta_ml %%
+   \subsection*{$\underline{\theta_{km}^{ML}:}$}
+   \underline{\textbf{Lagrangian and derivative:}}
+   \begin{align*}
+      Q_\theta(\Th, \Thold) &:= Q(\Th, \Thold) + \lambda \left(\sum_{m=1}^{\vert I \vert} \theta_{km} - 1\right) \\
+      & \\
+      & \\
+      \frac{\partial Q(\Th, \Thold)}{\partial \theta_{km}} &= \sumN \frac{\partial}{\partial \theta_{km}} \left(\sum_{k'=1}^K p(z_n = k' \mid \xn, \Thold) \sum_{i=1}^{W_n}\log \theta_{k'x_{ni}}\right) \\ 
+      & \\
+      &= \sumN p(z_n = k \mid \xn, \Thold) \frac{\partial}{\partial \theta_{km}} \left( \sum_{i=1}^{W_n}\log \theta_{kx_{ni}}\right) \\ 
+      &\\
+      &= \sumN p(z_n = k \mid \xn, \Thold) \sum_{i=1}^{W_n}[x_{ni} = m]\frac{1}{\theta_{kx_{ni}}}\\
+      & \qquad \text{, because for } x_{ni} \neq m:\frac{\partial}{\partial \theta_{km}} \left( \sum_{i=1}^{W_n}\log \theta_{kx_{ni}}\right) = 0\\
+      &= \sumN \frac{p(z_n = k \mid \xn, \Thold) c_{nm}}{\theta_{km}}\qquad\text{, where } c_{nm} = \sum_{i=1}^{W_n} [x_{in} = m]\\ 
+      & \\
+      &= \frac{1}{\theta_{km}} \sumN p(z_n = k \mid \xn, \Thold) c_{nm} \\
+      & \\
+      &= \frac{\tilde{c}_{km}}{\theta_{km}} \qquad \text{, where } \tilde{c}_{km} = \sumN p(z_n = k \mid \xn, \Thold)c_{nm} 
+   \end{align*}  
+    
+   \underline{\textbf{Critical points:}}
+   \begin{align*}
+       \frac{\partial Q_{\theta}(\Th, \Thold)}{\partial \theta_{km}} &= \frac{\tilde{c}_{km}}{\theta_{km}} + \lambda \overset{!}{=} 0 \\
+       & \\
+       \Rightarrow \frac{\tilde{c}_{km}}{\theta{km}} + \lambda = 0 \quad&\Rightarrow\quad \tilde{c}_{km} + \lambda \theta_{km} = 0 \quad \Rightarrow\quad \lambda \theta_{km} = -\tilde{c}_{km} 
+       \\
+       \Rightarrow \lambda \sum_{m=1}^{\vert I\vert} \theta_{km} &= -\sum_{m=1}^{\vert I \vert}\tilde{c}_{km} 
+       \\
+       \Rightarrow \lambda &= -\sum_{m=1}^{\vert I \vert} \tilde{c}_{km} = -\sum_{m=1}^{\vert I \vert} \sumN p(z_n = k \mid \xn, \Thold) \sum_{i=1}^{W_n}[x_{ni} = m] 
+       \\
+       &= -\sumN p(z_n = k \mid \xn, \Thold) \sum_{i=1}^{W_n}\sum_{m=1}^{\vert I \vert} [x_{ni} = m] \\
+       &= -\sumN p(z_n = k \mid \xn, \Thold) W_n \quad \text{, since }\sum_{m=1}^{\vert I \vert} [x_{ni} = m] = 1 \\
+       &= -\tilde{c}_k \qquad\text{, where } \tilde{c}_k = \sumN p(z_n = k \mid \xn, \Thold) W_n
+   \end{align*}
+   
+   \begin{align*}
+       \frac{\tilde{c}_{km}}{\theta_{km}} - \tilde{c}_k = 0 \quad \Rightarrow \quad \theta_{km}\tilde{c}_{k} = \tilde{c}_{km} \quad \Rightarrow \quad \theta_{km} = \frac{\tilde{c}_{km}}{\tilde{c}_k}
+   \end{align*}
+       
+   %\underline{\textbf{Maximum:}}
+   %\[
+%      \frac{\partial^2 Q_{\theta}(\Th, \Thold)}{\partial \theta_{km}^2} &= -\frac{\tilde{c}_{km}}{\theta_{km}^2} > 0 \quad \Rightarrow \text{ maximum}
+%   \]
+%   \[
+ %     \Rightarrow \theta_{km}^{ML} = \frac{\tilde{c}_{km}}{\tilde{c}_k}
+ %  \]
+   %%%%%%%%%%%%%%%%%%
+ \end{enumerate}
+
+\end{document}

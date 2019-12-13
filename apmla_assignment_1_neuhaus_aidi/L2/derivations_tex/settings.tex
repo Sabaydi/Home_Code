@@ -1,0 +1,29 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry} 
+\usepackage{amsmath}
+\usepackage{tcolorbox}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\usepackage{accents}
+\pagestyle{fancy}
+\setlength{\headheight}{40pt}
+
+
+\newenvironment{solution}
+  {\renewcommand\qedsymbol{$\blacksquare$}
+  \begin{proof}[Solution]}
+  {\end{proof}}
+\renewcommand\qedsymbol{$\blacksquare$}
+
+\newcommand{\ubar}[1]{\underaccent{\bar}{#1}}
+
+\newcommand{\xn}{\bold{x}_n}
+\newcommand{\Th}{\bold{\Theta}}
+\newcommand{\Thold}{\bold{\Theta}^{\text{old}}}
+\newcommand{\thb}{\boldsymbol{\theta}}
+\newcommand{\thbk}{\boldsymbol{\theta}_k}
+\newcommand{\xnset}{\{x_n\}_{n=1}^N}
+\newcommand{\sumK}{\sum_{k=1}^K}
+\newcommand{\sumN}{\sum_{n=1}^N}

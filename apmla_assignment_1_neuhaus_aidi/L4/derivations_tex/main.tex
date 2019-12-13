@@ -1,0 +1,186 @@
+\input{settings} % add packages, settings, and declarations in settings.tex
+
+\begin{document}
+
+\lhead{Yannic Neuhaus, Sabri Aidi} 
+\rhead{Advanced Probabilistic Machine Learning \\ WS19/20 \\ Tutorial 4} 
+\cfoot{\thepage\ of \pageref{LastPage}}
+ 
+ \begin{enumerate}
+   \item \input{problem_1}
+    \underline{$p(z_n = k \mid \xn, \Zmn, \Th):$} 
+    
+    \begin{align*}
+        p(z_n = k \mid \xn, \Zmn, \Th) &\propto p(z_n = k, \xn \mid \Zmn, \Th) 
+        \\
+        &= p(z_n = k \mid \Zmn, \cancel{\Th}) p(\xn \mid z_n = k, \Zmn, \Th)
+    \end{align*}
+    
+    \underline{$1 \leq k \leq K^+$:}
+    
+    From Lecture 4: 
+    \begin{align*}
+        p(z_n = k \mid \Zmn) &= \frac{m_k}{N-1 + \alpha} \quad \text{, where }m_k = \sum_{i=1}^{n-1}[z_i = k]
+    \end{align*}
+    \begin{align*}
+        p(\xn \mid z_n = k, \cancel{\Zmn}, \Th) &= p(\xn \mid \thbk) = \prod_{i = 1}^{W_n} \operatorname{Cat}(x_{ni} \mid \thbk)
+        \\\\
+        \Rightarrow p(z_n = k \mid \xn, \Zmn, \Th) &\propto \frac{m_k}{N-1 + \alpha} \cdot \prod_{i = 1}^{W_n} \operatorname{Cat}(x_{ni} \mid \thbk) 
+        \\
+        &= \frac{m_k}{N-1 + \alpha} \cdot \prod_{m = 1}^{\vert I \vert} \theta_{km}^{\sum_{i=1}^{W_n}[x_{ni} = m]} 
+        \\\\
+        \Rightarrow \log p(z_n = k \mid \xn, \Zmn, \Th) &\propto \log p(z_n = k \mid \Zmn, \cancel{\Th}) + \log p(\xn \mid z_n = k, \Zmn, \Th)
+        \\
+        &= \log m_k -\log(N - 1 + \alpha) + \sum_{m=1}^{\vert I \vert} \sum_{i=1}^{W_n} [x_{ni} = m] \log \theta_{km}
+    \end{align*}
+
+    \underline{$k = K_{new}$:}
+    
+    From Lecture 4:
+    \begin{align*}
+        p(z_n = K_{new} \mid \Zmn) &= \frac{\alpha}{N - 1 + \alpha} 
+    \end{align*}
+    \begin{align*}
+        p(\xn \mid z_n = K_{new}, \Zmn, \Th) &= p(\xn \mid z_n = K_{new}),
+        \\ \text{since }\Zmn &\text{ contains no assignments to $K_{new}$ and $\Th$ does not contain $\thb_{K_{new}}$}
+        \\\\
+        &= \int p(\xn, \thb \mid z_n = \Kn) d\thb
+        \\
+        &= \int p(\xn \mid z_n = \Kn, \thb) p(\thb \mid \boldsymbol{\gamma}) d\thb
+    \end{align*}
+    \begin{align*}
+        p(\xn \mid z_n = K_{new}) &= \int p(\xn \mid z_n = \Kn, \thb) p(\thb \mid \boldsymbol{\gamma}) d\thb
+        \\
+        &= \int \operatorname{Dir}(\thb\mid \boldsymbol{\gamma}) \prod_{i=1}^{W_n} \operatorname{Cat}(x_{ni}\mid \thb) d\thb
+        \\
+        &= \int \frac{1}{\operatorname{B}(\boldsymbol{\gamma})}\left(\prod_{m=1}^{\vert I \vert} \theta_{m}^{\gamma_m - 1}\right) \left( \prod_{m'=1}^{\vert I \vert} \theta_{m'}^{\sum_{i=1}^{W_n}[x_{ni} = m']}\right) d\thb
+        \\
+        &= \int \frac{\operatorname{B}(\boldsymbol{\gamma} + \boldsymbol{s})}{\operatorname{B}(\boldsymbol{\gamma})} \frac{1}{\operatorname{B}(\boldsymbol{\gamma} + \boldsymbol{s})} \prod_{m=1}^{\vert I \vert} \theta_{m}^{\gamma_m + s_m - 1} d\thb \quad \text{, where } s_m = \sum_{i=1}^{W_n} [x_{ni} = m]
+        \\
+        &= \frac{\operatorname{B}(\boldsymbol{\gamma} + \boldsymbol{s})}{\operatorname{B}(\boldsymbol{\gamma})} \int \operatorname{Dir}(\thb \mid \boldsymbol{\gamma} + \boldsymbol{s}) d\thb
+        \\
+        &= \frac{\operatorname{B}(\boldsymbol{\gamma} + \boldsymbol{s})}{\operatorname{B}(\boldsymbol{\gamma})}
+        \\
+        &= \frac{\prod_{m=1}^{\vert I \vert}\prod_{i=0}^{s_m - 1}(\gamma_m + i)}{\prod_{j=0}^{W_n -1}\left( i + \sum_{m'=1}^{\vert I\vert} \gamma_{m'} \right)} , \quad \text{ (as shown in Tutorial 3) }
+        \\\\
+        \Rightarrow p(z_n = \Kn \mid \xn, \Zmn, \Th) &\propto \frac{\alpha}{N - 1 + \alpha} \cdot \frac{\prod_{m=1}^{\vert I \vert}\prod_{i=0}^{s_m - 1}(\gamma_m + i)}{\prod_{j=0}^{W_n -1}\left( i + \sum_{m'=1}^{\vert I\vert} \gamma_{m'} \right)}
+    \end{align*}
+    
+    \underline{$p(\thb \mid \xn):$}
+    
+    \begin{align*}
+        p(\thb \mid \xn)  &\propto p(\xn \mid \thb) p(\thb) = p(\xn \mid \thb) p(\thb \mid \boldsymbol{\gamma}) 
+        \\
+        &= \prod_{i=1}^{W_n}\operatorname{Cat}(x_{ni}\mid \thb)\operatorname{Dir}(\thb  \mid \boldsymbol{\gamma})
+        \\
+        &= \prod_{m=1}^{\vert I \vert} \theta_m^{\sum_{i=1}^{W_n}[x_{ni} = m]} \frac{1}{\operatorname{B}(\boldsymbol{\gamma})} \prod_{m'=1}^{\vert I\vert} \theta_{m'}^{\gamma_{m'} - 1}
+        \\
+        &= \frac{1}{\operatorname{B(\boldsymbol{\gamma})}} \prod_{m=1}^{\vert I \vert} \theta_m^{\gamma_m + s_m -1}, \quad \text{where }  s_m = \sum_{i=1}^{W_n}[x_{ni} = m]
+        \\
+        &\propto \operatorname{Dir}(\thb  \mid\boldsymbol{\gamma} + \boldsymbol{s})
+        \\\\
+        \Rightarrow p(\thb \mid  \xn) &= \operatorname{Dir}(\thb \mid \boldsymbol{\gamma} + \boldsymbol{s})
+    \end{align*}
+    
+    \newpage
+    \underline{$p(\thbk \mid \boldsymbol{X}, \boldsymbol{Z}):$}
+
+    \begin{align*}
+        p(\thbk \mid \boldsymbol{X}, \boldsymbol{Z})  &\propto p(\thbk, \boldsymbol{X}\mid \boldsymbol{Z})= p(\thbk) p(\boldsymbol{X} \mid \thbk, \boldsymbol{Z}) 
+        \\
+        &= \operatorname{Dir}(\thbk  \mid \boldsymbol{\gamma}) \prod_{n=1}^N p(\xn \mid \thbk, z_n)
+        \\
+        &= \operatorname{Dir}(\thbk  \mid \boldsymbol{\gamma}) \prod_{n=1}^N p(\xn \mid \thbk)^{[z_n = k]}
+        \\
+        &= \operatorname{Dir}(\thbk  \mid \boldsymbol{\gamma}) \prod_{n=1}^N \prod_{i=1}^{W_n}\operatorname{Cat}(x_{ni} \mid \thbk)^{[z_n = k]}
+        \\
+        &= \operatorname{Dir}(\thbk  \mid \boldsymbol{\gamma}) \prod_{n=1}^N \prod_{i=1}^{W_n} \prod_{m=1}^{\vert I \vert}\theta_{km}^{[x_{ni} = m][z_n = k]}
+        \\
+        &= \operatorname{Dir}(\thbk  \mid \boldsymbol{\gamma}) \prod_{m=1}^{\vert I \vert} \theta_{km}^{\sum_{n=1}^N[z_n = k]\sum_{i=1}^{W_n}[x_{ni} = m]}
+        \\
+        &= \prod_{m=1}^{\vert I \vert} \theta_{km}^{\gamma_m + c_{km} - 1}, \quad \text{where, } c_{km} = \sum_{n=1}^N[z_n = k]\sum_{i=1}^{W_n}[x_{ni} = m]
+        \\
+        &\propto \operatorname{Dir}(\thbk \mid \boldsymbol{\gamma} + \boldsymbol{c}_k)
+        \\\\
+        \Rightarrow p(\thbk \mid \boldsymbol{X}, \boldsymbol{Z}) &= \operatorname{Dir}(\thbk \mid\boldsymbol{\gamma} + \boldsymbol{c}_k)
+    \end{align*}
+    
+%    From Tutorial 3:
+%    \begin{align*}
+%       p(z_n = k \mid \xn, \Zmn, \Th) &\propto p(\xn \mid z_n = k, \Zmn, \Th)  p(z_n = k \mid \Zmn) 
+%       \\
+%       &= p(\xn \mid z_n = k, \Zmn, \Th) \frac{\alpha_k + \sum_{i=1, i \neq n}^N[z_i = k]}{N - 1 + \sum_{l=1}^K \alpha_l} 
+       \\
+%       &= \left(\prod_{m=1}^{\vert I \vert} \theta_{km}^{\sum_{i=1}^{W_n}[x_{ni} = m]}\right) \frac{\alpha_k + \sum_{i=1, i \neq n}^N[z_i = k]}{N - 1 + \sum_{l=1}^K \alpha_l} 
+%   \end{align*}
+%   \underline{$\operatorname{log} p(z_n = k \mid \xn, \Zmn, \Th):$} 
+%   \begin{align*}
+%         \operatorname{log}p(z_n = k \mid \xn, \Zmn, \Th) &\propto \operatorname{log}p(\xn \mid z_n = k, \Zmn, \Th)  + \operatorname{log}p(z_n = k \mid \Zmn) 
+%         \\\\
+%         \operatorname{log}p(\xn \mid z_n = k, \Zmn, \Th) &= \sum_{m=1}^{\vert I \vert} \operatorname{log}(\theta_{km})\sum_{i=1}^{W_n}[x_{ni} = m]
+%         \\
+%         \operatorname{log}p(z_n = k \mid \Zmn) &= \operatorname{log}\left(\alpha_k + \sum_{i=1, i \neq n}^N[z_i = k]\right) - \operatorname{log}\left(N - 1 + \sum_{l=1}^K \alpha_l\right)
+%   \end{align*}
+   
+%   \underline{$p(\thbk \mid \boldsymbol{X}, \boldsymbol{Z}):$} 
+%    \begin{align*}
+%        p(\boldsymbol{\theta}_k \mid \boldsymbol{X}, \boldsymbol{Z}) &= \operatorname{Dir}(\thbk \mid \mathbf{\gamma}_k + \mathbf{c}_k) \text{, with } c_{km} = \sumN \sum_{j=1}^{W_n}[x_{nj} = m][z_n = k]   
+%    \end{align*}
+    
+%    \underline{$p(\thb \mid \xn):$} 
+    
+    
+   \newpage
+   \item \input{problem_2}
+ 
+    \underline{$p(z_n = k \mid \xn, \Zmn):$} 
+    
+    \begin{align*}
+        p(z_n = k \mid \xn, \Zmn) &\propto p(z_n = k, \xn \mid \Xmn, \Zmn)
+        \\
+        &= p(z_n = k \mid \Zmn) p(\xn \mid z_n = k, \Xmn, \Zmn)
+    \end{align*}
+    
+    \underline{$1 \leq k \leq K^+$:} 
+    
+    From Algorithm 1:
+    \begin{align*}
+        p(z_n = k \mid \Zmn) &= \frac{m_k}{N-1 + \alpha} \quad \text{, where }m_k = \sum_{i=1}^{n-1}[z_i = k]
+    \end{align*}
+    
+    From Tutorial 3:
+    \begin{align*}
+        p(\xn \mid z_n = k, \Xmn, \Zmn) &= \frac{\prod_{m=1}^{\vert I \vert}\prod_{i=0}^{s_m-1}\left(\gamma'_m + i\right)}{\prod_{i=0}^{W_n-1}(i+\sum_{m'=1}^{\vert I \vert} \gamma'_{m'})} \text{, where } \gamma'_{m} = \gamma_m + \sum_{i\neq n}\sum_{j=1}^{W_n}[x_{ij} = m][z_i = k]
+    \end{align*}
+    
+    \begin{align*}
+       \Rightarrow p(z_n = k \mid \xn, \Zmn) &\propto \frac{m_k}{N-1 + \alpha} \cdot \frac{\prod_{m=1}^{\vert I \vert}\prod_{i=0}^{s_m-1}\left(\gamma'_m + i\right)}{\prod_{i=0}^{W_n-1}(i+\sum_{m'=1}^{\vert I \vert} \gamma'_{m'})} 
+    \end{align*}
+    
+    \underline{$k = K_{new}:$}
+    
+    From Algorithm 1:
+    \begin{align*}
+        p(z_n = \Kn \mid \Zmn) &= \frac{\alpha}{N - 1 + \alpha} 
+        \\\\
+        p(\xn \mid z_n = K_{new}, \Xmn, \Zmn) &= p(\xn \mid z_n = \Kn),
+        \\
+        \text{ since } \Zmn &\text{ does not contain assignments to } \Kn
+        \\
+        &= \frac{\prod_{m=1}^{\vert I \vert}\prod_{i=0}^{s_m - 1}(\gamma_m + i)}{\prod_{j=0}^{W_n -1}\left( i + \sum_{m'=1}^{\vert I\vert} \gamma_{m'} \right)}
+        \\\\
+        \Rightarrow p(z_n = k \mid \xn, \Zmn) &\propto \frac{\alpha}{N - 1 + \alpha} \cdot \frac{\prod_{m=1}^{\vert I \vert}\prod_{i=0}^{s_m - 1}(\gamma_m + i)}{\prod_{j=0}^{W_n -1}\left( i + \sum_{m'=1}^{\vert I\vert} \gamma_{m'} \right)}
+    \end{align*}
+    
+   % \underline{$p(\thb \mid \Zmn):$}
+%    
+%    From Tutorial 3:
+%    \begin{align*}
+%        p(z_n = k \mid \Zmn) &= \frac{\alpha_k + \sum_{i=1, i \neq n}^N[z_i %= k]}{N - 1 + \sum_{l=1}^K \alpha_l} \\
+%        \operatorname{log}p(z_n = k \mid \Zmn) &= %\operatorname{log}\left(\alpha_k + \sum_{i=1, i \neq n}^N[z_i = k]\right) - %\operatorname{log}\left(N - 1 + \sum_{l=1}^K \alpha_l\right)
+%    \end{align*}
+  
+   
+ \end{enumerate}
+
+\end{document}
